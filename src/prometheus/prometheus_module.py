@@ -181,7 +181,7 @@ class PrometheusDaemon:
 
 if __name__ == "__main__":
     metric = prometheus.metrics.Counter(name="example1", documentation="")
-    counter = CounterEvent(name="example2", amount=1, labelnames={"set": True})
+    counter = CounterEvent(name="example2", amount=1, labels={"set": True})
 
     print(counter.verify_metric_type(metric))
 
