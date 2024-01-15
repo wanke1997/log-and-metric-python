@@ -7,13 +7,13 @@ import prometheus_client
 path = os.getcwd()
 path = os.path.abspath(os.path.join(path, os.pardir))
 sys.path.append(path)
-from prometheus.prometheus_module import PrometheusDaemon, PrometheusClient, metric_event_queue
+from prometheus.prometheus_module import PrometheusDaemon, PrometheusClient
 
 class PrometheusTest(unittest.TestCase):
     @classmethod
     def setUpClass(cls) -> None:
         cls.host = "0.0.0.0"
-        cls.port = 8092
+        cls.port = 8081
         cls.prometheus_daemon = PrometheusDaemon()
         cls.client = PrometheusClient()
         cls.prometheus_daemon.run(host=cls.host, port=cls.port)
@@ -40,9 +40,15 @@ class PrometheusTest(unittest.TestCase):
 
         assert isinstance(metric1, prometheus_client.Counter)
         assert isinstance(metric2, prometheus_client.Gauge)
-
         assert float(metric1.collect()[0].samples[0].value) == 25.0
         assert float(metric2.collect()[0].samples[0].value) == -2.0
+        # 5. additional metric change
+        self.client.set_gauge(name="sec", amount=333, succeed=True)
+        # 6. wait for threads to finish tasks
+        time.sleep(2)
+        # 7. assertions
+        assert float(metric2.collect()[0].samples[0].value) == 333.0
+
 
 if __name__ == '__main__':
     unittest.main()
