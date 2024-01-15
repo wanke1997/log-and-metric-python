@@ -1,16 +1,15 @@
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
+import time
 from typing import Any, Dict, Optional, List, Union
 import prometheus_client as prometheus
-import structlog
-from structlog.stdlib import BoundLogger
 from prometheus_client.registry import CollectorRegistry
 from wsgiref.simple_server import make_server, WSGIServer, WSGIRequestHandler
 from threading import Thread
-import time
 from multiprocessing import Queue
 from queue import Empty
+import logging
 
 metric_event_queue: Queue[MetricEvent] = Queue()
 
@@ -132,7 +131,7 @@ class EnumEvent(MetricEvent):
 class PrometheusDaemon:
     metric_dict: Dict[str, prometheus.Metric]
     daemon_thread: bool
-    _logger: structlog.stdlib.BoundLogger
+    _logger: logging.Logger
     wsgi_server: WSGIServer
     wsgi_server_thread: Thread
     update_event_thread: Thread
@@ -142,8 +141,7 @@ class PrometheusDaemon:
         self.metric_dict = dict()
         self.daemon_thread = True
         self.kill_update_event_thread = False
-        # TODO: create a logger object
-        # self._logger = BoundLogger()
+        self._logger = logging.getLogger("basic")
 
     def _create_metric_collector(self, metric_type: Any, name: str, documentation: str, labelnames: List[str], states: Optional[Any]=None) -> None:
         """
@@ -220,6 +218,7 @@ class PrometheusDaemon:
         self.update_event_thread = Thread(target=self._update_metrics, args=(refresh_rate,))
         self.update_event_thread.daemon = True
         self.update_event_thread.start()
+        self._logger.info("update_event_thread started")
 
     def _start_server(self, host: str, port: int, registry:CollectorRegistry=prometheus.REGISTRY):
         """
@@ -234,6 +233,7 @@ class PrometheusDaemon:
         # thread will terminate as well!
         self.wsgi_server_thread = Thread(target=self.wsgi_server.serve_forever, daemon=True)
         self.wsgi_server_thread.start()
+        self._logger.info("wsgi_server_thread started")
     
     def shutdown(self) -> None:
         """
@@ -247,6 +247,7 @@ class PrometheusDaemon:
         # closes the wsgi server safely
         self.wsgi_server.shutdown()
         self.wsgi_server.server_close()
+        self._logger.info("wsgi_server_thread stopped")
     
     def _update_metrics(self, refresh_rate: Union[int, float]):
         global metric_event_queue
@@ -263,9 +264,9 @@ class PrometheusDaemon:
                 if event.verify_metric_type(metric):
                     event.update_event(metric)
             else:
-                # TODO: add log as an error: Metric is not the given type
-                pass
+                self._logger.error("Metric is not the given type")
             time.sleep(refresh_rate)
+        self._logger.info("update_event_thread stopped")
 
 
 class PrometheusClient:

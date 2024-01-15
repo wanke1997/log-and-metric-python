@@ -1,4 +1,6 @@
 import time
+import logging
+from logging import StreamHandler
 from prometheus.prometheus_module import PrometheusClient, PrometheusDaemon
 
 class PrintWithMetric:
@@ -37,6 +39,19 @@ class PrintWithMetric:
     
 if __name__ == "__main__":
     # 1. setup
+    logger = logging.getLogger("basic")
+    logger.setLevel(level=logging.INFO)
+    if not logger.handlers:
+        hdlr = StreamHandler()
+        hdlr.setLevel(level=logging.INFO)
+        json_format = logging.Formatter('{"time": "%(asctime)s", "level": "%(levelname)s", "message": "%(message)s"}')
+        hdlr.setFormatter(json_format)
+        logger.addHandler(hdlr=hdlr)
+    else:
+        hdlr = logger.handlers[0]
+        json_format = logging.Formatter('{"time": "%(asctime)s", "level": "%(levelname)s", "message": "%(message)s"}')
+        hdlr.setFormatter(json_format)
+    logger.info("Setup finished for the driver code")
     instance = PrintWithMetric()
     instance.setup()
     # 2. execute program
