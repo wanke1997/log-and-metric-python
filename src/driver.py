@@ -13,18 +13,27 @@ class PrintWithMetric:
         self.daemon.shutdown()
 
     def print_all_numbers(self,start:int=1, end:int=200):
+        threes = 0
+        fives = 0
         for i in range(start, end+1):
-            if i%10==0:
+            if i%100==0:
                 print("At this time i = "+str(i))
-            # add a log here
+                # update metrics here
+                self.client.inc_gauge(name="three_div", amount=threes, success=True)
+                self.client.inc_gauge(name="five_div", amount=fives, success=True)
+                time.sleep(2)
+                # reset counters
+                threes = 0
+                fives = 0
+            # TODO: add a log here
             if i%3 == 0:
-                # add a metric here
-                self.client.inc_gauge(name="three_div", amount=1, success=True)
+                threes += 1
             if i%5 == 0:
-                # add a metric here
-                self.client.inc_gauge(name="five_div", amount=1, success=True)
-            # NOTE: prometheus is very slow, we need to reserve enough time for it to update the value
-            time.sleep(0.4)
+                fives += 1
+        
+        self.client.inc_gauge(name="three_div", amount=threes, success=True)
+        self.client.inc_gauge(name="five_div", amount=fives, success=True)
+        time.sleep(2)
     
 if __name__ == "__main__":
     # 1. setup
@@ -32,7 +41,6 @@ if __name__ == "__main__":
     instance.setup()
     # 2. execute program
     instance.print_all_numbers()
-    time.sleep(2)
     # 3. get metric
     metric1 = instance.daemon.metric_dict.get("three_div")
     metric2 = instance.daemon.metric_dict.get("five_div")
