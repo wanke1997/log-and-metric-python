@@ -24,6 +24,7 @@ class PrintWithMetric:
             if i%5 == 0:
                 # add a metric here
                 self.client.inc_gauge(name="five_div", amount=1, success=True)
+            # NOTE: prometheus is very slow, we need to reserve enough time for it to update the value
             time.sleep(0.4)
     
 if __name__ == "__main__":
