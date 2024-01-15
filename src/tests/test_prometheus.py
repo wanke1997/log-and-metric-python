@@ -3,7 +3,7 @@ import sys
 import unittest
 import time
 import prometheus_client
-# The lines below is used to import src directory, then we can import prometheus folder
+# The lines below are used to import src directory, then we can import prometheus folder
 path = os.getcwd()
 path = os.path.abspath(os.path.join(path, os.pardir))
 sys.path.append(path)

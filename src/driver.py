@@ -1,4 +1,3 @@
-import sys
 import time
 from prometheus.prometheus_module import PrometheusClient, PrometheusDaemon
 
