@@ -3,11 +3,13 @@ import sys
 import unittest
 import time
 import prometheus_client
+
 # The lines below are used to import src directory, then we can import prometheus folder
 path = os.getcwd()
 path = os.path.abspath(os.path.join(path, os.pardir))
 sys.path.append(path)
 from prometheus.prometheus_module import PrometheusDaemon, PrometheusClient
+
 
 class PrometheusTest(unittest.TestCase):
     @classmethod
@@ -17,13 +19,13 @@ class PrometheusTest(unittest.TestCase):
         cls.prometheus_daemon = PrometheusDaemon()
         cls.client = PrometheusClient()
         cls.prometheus_daemon.run(host=cls.host, port=cls.port)
-    
+
     @classmethod
     def tearDownClass(cls) -> None:
         cls.prometheus_daemon.shutdown()
         cls.prometheus_daemon.wsgi_server_thread.join()
         cls.prometheus_daemon.update_event_thread.join()
-    
+
     def test_metric(self):
         # 1. create metric collectors
         self.prometheus_daemon.create_counter(name="total", documentation="none", labelnames=["succeed"])
@@ -50,5 +52,5 @@ class PrometheusTest(unittest.TestCase):
         assert float(metric2.collect()[0].samples[0].value) == 333.0
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()
