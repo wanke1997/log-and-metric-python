@@ -258,7 +258,6 @@ class PrometheusDaemon:
                 time.sleep(refresh_rate)
                 continue
             name = event.name
-            print("amount:", event.amount)
             if name in self.metric_dict.keys():
                 metric = self.metric_dict.get(name)
                 if event.verify_metric_type(metric):
