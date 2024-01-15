@@ -1,0 +1,27 @@
+# HELP python_gc_objects_collected_total Objects collected during gc
+# TYPE python_gc_objects_collected_total counter
+python_gc_objects_collected_total{generation="0"} 348.0
+python_gc_objects_collected_total{generation="1"} 43.0
+python_gc_objects_collected_total{generation="2"} 0.0
+# HELP python_gc_objects_uncollectable_total Uncollectable objects found during GC
+# TYPE python_gc_objects_uncollectable_total counter
+python_gc_objects_uncollectable_total{generation="0"} 0.0
+python_gc_objects_uncollectable_total{generation="1"} 0.0
+python_gc_objects_uncollectable_total{generation="2"} 0.0
+# HELP python_gc_collections_total Number of times this generation was collected
+# TYPE python_gc_collections_total counter
+python_gc_collections_total{generation="0"} 55.0
+python_gc_collections_total{generation="1"} 5.0
+python_gc_collections_total{generation="2"} 0.0
+# HELP python_info Python platform information
+# TYPE python_info gauge
+python_info{implementation="CPython",major="3",minor="9",patchlevel="7",version="3.9.7"} 1.0
+# HELP total_total none
+# TYPE total_total counter
+total_total{succeed="True"} 25.0
+# HELP total_created none
+# TYPE total_created gauge
+total_created{succeed="True"} 1.705285438760237e+09
+# HELP sec none
+# TYPE sec gauge
+sec{succeed="True"} -2.0
