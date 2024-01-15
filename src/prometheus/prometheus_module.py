@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
-from typing import Any, Dict, Optional, List, Tuple, Union
+from typing import Any, Dict, Optional, List, Union
 import prometheus_client as prometheus
 import structlog
 from structlog.stdlib import BoundLogger
@@ -11,7 +11,6 @@ from threading import Thread
 import time
 from multiprocessing import Queue
 from queue import Empty
-from prometheus_client import Metric
 
 metric_event_queue: Queue[MetricEvent] = Queue()
 

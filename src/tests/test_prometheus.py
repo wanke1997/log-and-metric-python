@@ -3,7 +3,6 @@ import sys
 import unittest
 import time
 import prometheus_client
-from multiprocessing import Process
 # The lines below is used to import src directory, then we can import prometheus folder
 path = os.getcwd()
 path = os.path.abspath(os.path.join(path, os.pardir))
