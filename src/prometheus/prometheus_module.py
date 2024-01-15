@@ -1,7 +1,19 @@
+from __future__ import annotations
+
 from abc import ABC, abstractmethod
 from typing import Any, Dict, Optional, List, Tuple, Union
 import prometheus_client as prometheus
+import structlog
+from structlog.stdlib import BoundLogger
+from prometheus_client.registry import CollectorRegistry
+from wsgiref.simple_server import make_server, WSGIServer, WSGIRequestHandler
+from threading import Thread
+import time
+from multiprocessing import Queue
+from queue import Empty
+from prometheus_client import Metric
 
+metric_event_queue: Queue[MetricEvent] = Queue()
 
 class MetricEvent(ABC):
     name: str
@@ -30,7 +42,7 @@ class CounterEvent(MetricEvent):
         metric_type = prometheus.Counter
         super().__init__(name, amount, metric_type, labels)
 
-    def update_event(self, metric: prometheus.metrics.Counter) -> None:
+    def update_event(self, metric: prometheus.Counter) -> None:
         """
         increment counter by the given amount
         """
@@ -119,11 +131,22 @@ class EnumEvent(MetricEvent):
 
 
 class PrometheusDaemon:
-    metric_dict: Dict[str, Any]
+    metric_dict: Dict[str, prometheus.Metric]
+    daemon_thread: bool
+    _logger: structlog.stdlib.BoundLogger
+    wsgi_server: WSGIServer
+    wsgi_server_thread: Thread
+    update_event_thread: Thread
+    kill_update_event_thread: bool
+
     def __init__(self) -> None:
         self.metric_dict = dict()
+        self.daemon_thread = True
+        self.kill_update_event_thread = False
+        # TODO: create a logger object
+        # self._logger = BoundLogger()
 
-    def _create_metric(self, metric_type: Any, name: str, documentation: str, labelnames: List[str], states: Optional[Any]=None) -> None:
+    def _create_metric_collector(self, metric_type: Any, name: str, documentation: str, labelnames: List[str], states: Optional[Any]=None) -> None:
         """
         Base create metric method
         """
@@ -141,51 +164,150 @@ class PrometheusDaemon:
         Creates a Prometheus Counter metric
         """
         metric_type = prometheus.Counter
-        self._create_metric(metric_type, name, documentation, labelnames)
+        self._create_metric_collector(metric_type, name, documentation, labelnames)
 
     def create_gauge(self, name: str, documentation: Any, labelnames: List[str]) -> None:
         """
         Creates a Prometheus Gauge metric
         """
         metric_type = prometheus.Gauge
-        self._create_metric(metric_type, name, documentation, labelnames)
+        self._create_metric_collector(metric_type, name, documentation, labelnames)
     
     def create_summary(self, name: str, documentation: Any, labelnames: List[str]) -> None:
         """
         Creates a Prometheus Summary metric
         """
         metric_type = prometheus.Summary
-        self._create_metric(metric_type, name, documentation, labelnames)
+        self._create_metric_collector(metric_type, name, documentation, labelnames)
     
     def create_histogram(self, name: str, documentation: Any, labelnames: List[str]) -> None:
         """
         Creates a Prometheus Histogram metric
         """
         metric_type = prometheus.Histogram
-        self._create_metric(metric_type, name, documentation, labelnames)
+        self._create_metric_collector(metric_type, name, documentation, labelnames)
     
     def create_info(self, name: str, documentation: Any, labelnames: List[str]) -> None:
         """
         Creates a Prometheus Info metric
         """
         metric_type = prometheus.Info
-        self._create_metric(metric_type, name, documentation, labelnames)
+        self._create_metric_collector(metric_type, name, documentation, labelnames)
 
     def create_enum(self, name: str, documentation: Any, labelnames: List[str], states: List[str]) -> None:
         """
         Creates a Prometheus Enum metric
         """
         metric_type = prometheus.Enum
-        self._create_metric(metric_type, name, documentation, labelnames, states)
+        self._create_metric_collector(metric_type, name, documentation, labelnames, states)
+    
+    def remove_metric_collector(self, collector: prometheus.Metric) -> None:
+        """
+        Removes a metric collectors
+        """
+        if isinstance(collector, (prometheus.Counter, prometheus.Gauge, prometheus.Summary, prometheus.Histogram, prometheus.Info, prometheus.Enum)):
+            if collector._name in self.metric_dict:
+                self.metric_dict.pop(collector._name)
+                prometheus.REGISTRY.unregister(collector)
+            else:
+                raise Exception("no such collector")
     
 
-if __name__ == "__main__":
-    metric = prometheus.metrics.Counter(name="example1", documentation="")
-    counter = CounterEvent(name="example2", amount=1, labels={"set": True})
+    def run(self, host: str = "0.0.0.0", port: int=8081, refresh_rate: Union[int, float]=0.5):
+        """
+        Start prometheus HTTP server and updating thread
+        """
+        self._start_server(host, port)
+        self.update_event_thread = Thread(target=self._update_metrics, args=(refresh_rate,))
+        self.update_event_thread.daemon = True
+        self.update_event_thread.start()
 
-    print(counter.verify_metric_type(metric))
-
-    prometheus_daemon = PrometheusDaemon()
-    prometheus_daemon.create_counter(name="total", documentation="none", labelnames=["succeed"])
-    print(prometheus_daemon.metric_dict)
+    def _start_server(self, host: str, port: int, registry:CollectorRegistry=prometheus.REGISTRY):
+        """
+        Start prometheus HTTP server with wsgi simple httpd server
+        """
+        # create a wsgi application
+        app = prometheus.make_wsgi_app(registry=registry)
+        # create a wsgi server instance
+        self.wsgi_server = make_server(host, port, app, handler_class=WSGIRequestHandler)
+        # launch the server with a thread
+        # NOTE: if we set the wsgi_server_thread as a daemon thread, when the main thread terminates, the deamon
+        # thread will terminate as well!
+        self.wsgi_server_thread = Thread(target=self.wsgi_server.serve_forever, daemon=True)
+        self.wsgi_server_thread.start()
     
+    def shutdown(self) -> None:
+        """
+        Shutdown daemon threads
+        """
+        self.kill_update_event_thread = True
+        while self.update_event_thread and self.update_event_thread.is_alive():
+            # NOTE: wait until the thread terminates, will not continue until
+            # the thread terminates. 
+            self.update_event_thread.join()
+        # closes the wsgi server safely
+        self.wsgi_server.shutdown()
+        self.wsgi_server.server_close()
+    
+    def _update_metrics(self, refresh_rate: Union[int, float]):
+        global metric_event_queue
+        while not self.kill_update_event_thread:
+            # retrieve an event from metric_event_queue
+            try:
+                event = metric_event_queue.get_nowait()
+            except Empty:
+                time.sleep(refresh_rate)
+                continue
+            name = event.name
+            print("amount:", event.amount)
+            if name in self.metric_dict.keys():
+                metric = self.metric_dict.get(name)
+                if event.verify_metric_type(metric):
+                    event.update_event(metric)
+            else:
+                # TODO: add log as an error: Metric is not the given type
+                pass
+            time.sleep(refresh_rate)
+
+
+class PrometheusClient:
+    """
+    A Prometheus client which creates metric update events and 
+    send them to queue to process
+    """
+    
+    def _send_to_queue(self, event: MetricEvent) -> None:
+        global metric_event_queue
+        metric_event_queue.put(event)
+    
+    def inc_counter(self, name: str, amount: int, **kwargs: str) -> None:
+        event = CounterEvent(name, amount, kwargs)
+        self._send_to_queue(event)
+    
+    def inc_gauge(self, name: str, amount: int, **kwargs: str) -> None:
+        event = GaugeIncEvent(name, amount, kwargs)
+        self._send_to_queue(event)
+
+    def dec_gauge(self, name: str, amount: int, **kwargs: str) -> None:
+        event = GaugeDecEvent(name, amount, kwargs)
+        self._send_to_queue(event)
+
+    def set_gauge(self, name: str, amount: int, **kwargs: str) -> None:
+        event = GaugeSetEvent(name, amount, kwargs)
+        self._send_to_queue(event)
+
+    def update_summary(self, name: str, amount: int, **kwargs: str) -> None:
+        event = SummaryEvent(name, amount, kwargs)
+        self._send_to_queue(event)
+
+    def update_histogram(self, name: str, amount: int, **kwargs: str) -> None:
+        event = HistogramEvent(name, amount, kwargs)
+        self._send_to_queue(event)
+    
+    def update_info(self, name: str, amount: int, **kwargs: str) -> None:
+        event = InfoEvent(name, amount, kwargs)
+        self._send_to_queue(event)
+    
+    def update_enum(self, name: str, amount: int, **kwargs: str) -> None:
+        event = EnumEvent(name, amount, kwargs)
+        self._send_to_queue(event)
