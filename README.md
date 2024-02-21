@@ -9,3 +9,5 @@ docker-compose up -d
 
 ### reference:
 https://medium.com/@e.ahmadi/monitoring-your-system-with-prometheus-and-grafana-efb328cedd4b
+https://stackoverflow.com/questions/49829423/prometheus-add-target-specific-label-in-static-configs
+https://medium.com/swlh/easy-grafana-and-docker-compose-setup-d0f6f9fcec13

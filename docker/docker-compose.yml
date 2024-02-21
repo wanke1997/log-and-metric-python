@@ -35,6 +35,3 @@ services:
 networks:
   proxynet:
     name: metric_network
-
-
-# ref: https://medium.com/swlh/easy-grafana-and-docker-compose-setup-d0f6f9fcec13
