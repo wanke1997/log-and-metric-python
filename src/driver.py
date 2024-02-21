@@ -61,6 +61,9 @@ if __name__ == "__main__":
     metric2 = instance.daemon.metric_dict.get("five_div")
     print(metric1.collect()[0].samples[0].value)
     print(metric2.collect()[0].samples[0].value)
-    time.sleep(2)
+    
+    while True:
+        time.sleep(10)
+    # time.sleep(5*60)
     # 4. tear down
-    instance.teardown()
+    # instance.teardown()
