@@ -8,7 +8,7 @@ RUN apt update && apt install python3-pip -y
 
 RUN pip3 install prometheus_client
 
-EXPOSE 8080 8081 9090
+EXPOSE 8081
 
 RUN update-alternatives --install "/usr/bin/python" "python" "$(which python3)" 1
 
