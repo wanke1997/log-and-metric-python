@@ -7,7 +7,7 @@ This repository is to implement log and metric system with `structlog` and `Prom
 * `grafana`: Directory for `grafana-container`
 * `src`: Source code for `driver-container`
 
-### dDocker Image Build and Launch
+### Docker Image Build and Launch
 ```bash
 cd docker
 docker build -t metric-driver-image -f driver.Dockerfile .
