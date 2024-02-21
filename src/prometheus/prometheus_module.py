@@ -145,6 +145,7 @@ class PrometheusDaemon:
         self.daemon_thread = True
         self.kill_update_event_thread = False
         self._logger = logging.getLogger("basic")
+        self._logger.info("Prometheus Daemon initiated")
 
     def _create_metric_collector(
         self, metric_type: Any, name: str, documentation: str, labelnames: List[str], states: Optional[Any] = None
