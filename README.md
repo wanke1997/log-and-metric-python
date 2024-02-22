@@ -16,7 +16,7 @@ docker-compose up -d
 
 ### Unit Test Script
 ```bash
-cd cd src/tests/
+cd src/tests/
 python test_prometheus.py
 ```
 
