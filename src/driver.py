@@ -71,9 +71,9 @@ if __name__ == "__main__":
     metric1 = instance.daemon.metric_dict.get("three_div")
     metric2 = instance.daemon.metric_dict.get("five_div")
     print(metric1.collect()[0].samples[0].value)
-    logger.info("result 1:", metric1.collect()[0].samples[0].value)
+    logger.info("result 1: "+str(metric1.collect()[0].samples[0].value))
     print(metric2.collect()[0].samples[0].value)
-    logger.info("result 2:", metric2.collect()[0].samples[0].value)
+    logger.info("result 2: "+str(metric2.collect()[0].samples[0].value))
     
     # while True:
     #     time.sleep(10)
