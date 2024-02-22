@@ -46,7 +46,6 @@ if __name__ == "__main__":
     # 1. setup
     logger = logging.getLogger("basic")
     logger.setLevel(level=logging.INFO)
-    # os.mkdir(LOG_DIR)
     ecs_handler = logging.FileHandler(LOG_DIR+"driver_log.json")
     ecs_handler.setFormatter(ecs_logging.StdlibFormatter())
     logger.addHandler(ecs_handler)
@@ -75,8 +74,8 @@ if __name__ == "__main__":
     print(metric2.collect()[0].samples[0].value)
     logger.info("result 2: "+str(metric2.collect()[0].samples[0].value))
     
-    # while True:
-    #     time.sleep(10)
+    while True:
+        time.sleep(10)
     # time.sleep(5*60)
     # 4. tear down
-    instance.teardown()
+    # instance.teardown()
