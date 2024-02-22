@@ -35,9 +35,11 @@ services:
   
   filebeat-container:
     container_name: filebeat-container
-    image: docker.elastic.co/beats/filebeat:7.5.0
+    image: docker.elastic.co/beats/filebeat:7.17.0
     depends_on:
       - driver-container
+      - elasticsearch
+      - kibana
     restart: unless-stopped
     environment:
       - ELASTICSEARCH_HOSTS=elasticsearch
@@ -64,7 +66,7 @@ services:
 
   # Elasticsearch Docker Images: https://www.docker.elastic.co/
   elasticsearch:
-    image: docker.elastic.co/elasticsearch/elasticsearch:7.5.0
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.17.0
     container_name: elasticsearch
     environment:
       - xpack.security.enabled=false
@@ -80,8 +82,6 @@ services:
         hard: 65536
     cap_add:
       - IPC_LOCK
-    volumes:
-      - ../elasticsearch-data:/usr/share/elasticsearch/data
     ports:
       - "9200:9200"
       - "9300:9300"
@@ -90,7 +90,7 @@ services:
 
   kibana:
     container_name: kibana
-    image: docker.elastic.co/kibana/kibana:7.5.0
+    image: docker.elastic.co/kibana/kibana:7.17.0
     environment:
       - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
     ports:

@@ -46,7 +46,7 @@ if __name__ == "__main__":
     # 1. setup
     logger = logging.getLogger("basic")
     logger.setLevel(level=logging.INFO)
-    os.mkdir("logs")
+    # os.mkdir(LOG_DIR)
     ecs_handler = logging.FileHandler(LOG_DIR+"driver_log.json")
     ecs_handler.setFormatter(ecs_logging.StdlibFormatter())
     logger.addHandler(ecs_handler)
@@ -71,7 +71,9 @@ if __name__ == "__main__":
     metric1 = instance.daemon.metric_dict.get("three_div")
     metric2 = instance.daemon.metric_dict.get("five_div")
     print(metric1.collect()[0].samples[0].value)
+    logger.info("result 1:", metric1.collect()[0].samples[0].value)
     print(metric2.collect()[0].samples[0].value)
+    logger.info("result 2:", metric2.collect()[0].samples[0].value)
     
     # while True:
     #     time.sleep(10)
