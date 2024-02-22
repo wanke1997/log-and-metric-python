@@ -17,9 +17,9 @@ docker-compose up -d
 ### Additional Important Details for the Project
 After launching `docker-compose.yml` script, `grafana-container` and `driver-container` started first. `prometheus-container` started afterwards when `driver-container` completely started. <br>
 
-The `driver-container:8081` endpoint reflects original plain prometheus metric. The Prometheus server collects original prometheus metric and reflects itself as an application at `prometheus-container:9090`. The metrics are shown at `prometheus-container:9090/metrics` endpoint. The `grafana-container` reads metrics from `prometheus-container:9090` application. <br>
+The `driver-container:8081` endpoint reflects original plain prometheus metric. The Prometheus server collects original prometheus metric and reflects itself as a service at `prometheus-container:9090`. The metrics are shown at `prometheus-container:9090/metrics` endpoint. The `grafana-container` reads metrics from `prometheus-container:9090` service. <br>
 
-Note that `grafana-container` cannot read `driver-container:8081` original metric endpoint directly. It can only read prometheus server's application from `prometheus-container:9090`. <br>
+Note that `grafana-container` cannot read `driver-container:8081` original metric endpoint directly. It can only read prometheus server's service from `prometheus-container:9090`. <br>
 
 Configuration file for prometheus server is `/etc/prometheus/prometheus.yml` in the container. We set the endpoints in the `scrape_configs` section. 
 
