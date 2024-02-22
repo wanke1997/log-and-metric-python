@@ -14,10 +14,16 @@ docker build -t metric-driver-image -f driver.Dockerfile .
 docker-compose up -d
 ```
 
+### Unit Test Script
+```bash
+cd cd src/tests/
+python test_prometheus.py
+```
+
 ### Additional Important Details for the Project
 After launching `docker-compose.yml` script, `grafana-container` and `driver-container` started first. `prometheus-container` started afterwards when `driver-container` completely started. <br>
 
-The `driver-container:8081` endpoint reflects original plain prometheus metric. The Prometheus server collects original prometheus metric and reflects itself as a service at `prometheus-container:9090`. The metrics are shown at `prometheus-container:9090/metrics` endpoint. The `grafana-container` reads metrics from `prometheus-container:9090` service. <br>
+The `driver-container:8081` endpoint reflects original plain prometheus metric. The Prometheus server scrapes original prometheus metric and exposes itself as a service at `prometheus-container:9090`. The metrics are shown at `prometheus-container:9090/metrics` endpoint. The `grafana-container` reads metrics from `prometheus-container:9090` service. <br>
 
 Note that `grafana-container` cannot read `driver-container:8081` original metric endpoint directly. It can only read prometheus server's service from `prometheus-container:9090`. <br>
 
@@ -27,3 +33,4 @@ Configuration file for prometheus server is `/etc/prometheus/prometheus.yml` in 
 https://medium.com/@e.ahmadi/monitoring-your-system-with-prometheus-and-grafana-efb328cedd4b
 https://stackoverflow.com/questions/49829423/prometheus-add-target-specific-label-in-static-configs
 https://medium.com/swlh/easy-grafana-and-docker-compose-setup-d0f6f9fcec13
+https://stackoverflow.com/questions/70586927/how-to-add-the-kafka-exporter-as-a-data-source-to-grafana
