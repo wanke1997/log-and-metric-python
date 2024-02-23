@@ -3,8 +3,6 @@ import logging
 from logging import StreamHandler
 from prometheus.prometheus_module import PrometheusClient, PrometheusDaemon
 import ecs_logging
-import os
-import shutil
 
 LOG_DIR = "/usr/share/logs/"
 
