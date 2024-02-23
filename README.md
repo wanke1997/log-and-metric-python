@@ -2,10 +2,11 @@
 This repository is to implement log and metric system with `structlog` and `Prometheus`. 
 
 ### Structure of the Project
-* `config`: Configuration files are in this directory. Contains `prometheus.yml` mapping to `/etc/prometheus/prometheus.yml` in prometheus-container
+* `config`: Configuration files are in this directory. `prometheus.yml` maps to `/etc/prometheus/prometheus.yml` for prometheus-container. `filebeat.yml` maps to `/usr/share/filebeat/filebeat.yml` for filebeat-container. 
 * `docker`: Docker files for the project
 * `grafana`: Directory for `grafana-container`
 * `src`: Source code for `driver-container`
+* `logs`: The driver code may create `logs` directory to store logs as .json format. 
 
 ### Docker Image Build and Launch
 ```bash
@@ -13,6 +14,15 @@ cd docker
 docker build -t metric-driver-image -f driver.Dockerfile .
 docker-compose up -d
 ```
+
+### Endpoints
+All URLS are shown in the table below. Note that all hostnames are mapped to `localhost`.
+| URL    | Description |
+| -------- | ------- |
+| driver-container:8081  | original prometheus metric    |
+| prometheus-container:9090 | Prometheus server application    |
+| grafana-container:3000    | Grafana page    |
+| kibana:5601    | Kibana application    |
 
 ### Unit Test Script
 ```bash
