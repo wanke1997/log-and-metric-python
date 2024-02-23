@@ -16,10 +16,10 @@ docker-compose up -d
 ```
 
 ### Endpoints
-All URLS are shown in the table below. Note that all hostnames are mapped to `localhost`.
+All URLs are shown in the table below. Note that all hostnames are mapped to `localhost`.
 | URL    | Description |
 | -------- | ------- |
-| driver-container:8081  | original prometheus metric    |
+| driver-container:8081  | Original prometheus metric    |
 | prometheus-container:9090 | Prometheus server application    |
 | grafana-container:3000    | Grafana page    |
 | kibana:5601    | Kibana application    |
@@ -44,3 +44,4 @@ https://medium.com/@e.ahmadi/monitoring-your-system-with-prometheus-and-grafana-
 https://stackoverflow.com/questions/49829423/prometheus-add-target-specific-label-in-static-configs
 https://medium.com/swlh/easy-grafana-and-docker-compose-setup-d0f6f9fcec13
 https://stackoverflow.com/questions/70586927/how-to-add-the-kafka-exporter-as-a-data-source-to-grafana
+https://www.elastic.co/guide/en/cloud/current/ec-getting-started-search-use-cases-python-logs.html
