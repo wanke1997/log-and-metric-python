@@ -2,9 +2,7 @@ version: '3.8'
 services:
   prometheus-container:
     container_name: prometheus-container
-    depends_on:
-      - driver-container
-    image: prom/prometheus:latest
+    image: prom/prometheus:v2.49.0
     volumes:
       - ../config/prometheus.yml:/etc/prometheus/prometheus.yml
     ports:
@@ -25,7 +23,7 @@ services:
   
   grafana-container:
     container_name: grafana-container
-    image: grafana/grafana:latest
+    image: grafana/grafana:10.0.1
     volumes:
       - ../grafana:/opt/grafana
     ports:

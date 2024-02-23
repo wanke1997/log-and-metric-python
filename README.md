@@ -10,6 +10,7 @@ This repository is to implement log and metric system with `structlog` and `Prom
 
 ### Docker Image Build and Launch
 ```bash
+sudo chmod -R 444 config
 cd docker
 docker build -t metric-driver-image -f driver.Dockerfile .
 docker-compose up -d
