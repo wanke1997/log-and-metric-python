@@ -17,6 +17,7 @@ services:
     image: metric-driver-image:latest
     volumes:
       - ../src:/opt/src
+      - ../logs:/usr/share/logs
     ports:
       - "8081:8081"
     networks:
@@ -31,7 +32,74 @@ services:
       - "3000:3000"
     networks:
       - proxynet
-    
+  
+  filebeat-container:
+    container_name: filebeat-container
+    image: docker.elastic.co/beats/filebeat:7.17.18
+    depends_on:
+      - driver-container
+      - elasticsearch
+      - kibana
+    restart: unless-stopped
+    environment:
+      - ELASTICSEARCH_HOSTS=elasticsearch
+      - ELASTICSEARCH_USERNAME=elastic
+      - ELASTICSEARCH_PASSWORD=elastic
+    labels:
+      co.elastic.logs/enabled: "false"
+    volumes:
+      - ../config/filebeat.yml:/usr/share/filebeat/filebeat.yml
+      - ../logs:/usr/share/filebeat/logs
+      - type: bind
+        source: /var/run/docker.sock
+        target: /var/run/docker.sock
+      - type: bind
+        source: /var/lib/docker
+        target: /var/lib/docker
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "2"
+    networks:
+      - proxynet
+
+  # Elasticsearch Docker Images: https://www.docker.elastic.co/
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.17.18
+    container_name: elasticsearch
+    environment:
+      - xpack.security.enabled=false
+      - discovery.type=single-node
+      - ELASTIC_USERNAME=elastic
+      - ELASTIC_PASSWORD=elastic
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+      nofile:
+        soft: 65536
+        hard: 65536
+    cap_add:
+      - IPC_LOCK
+    ports:
+      - "9200:9200"
+      - "9300:9300"
+    networks:
+      - proxynet
+
+  kibana:
+    container_name: kibana
+    image: docker.elastic.co/kibana/kibana:7.17.18
+    environment:
+      - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
+    ports:
+      - "5601:5601"
+    depends_on:
+      - elasticsearch
+    networks:
+      - proxynet
+
 networks:
   proxynet:
     name: metric_network
