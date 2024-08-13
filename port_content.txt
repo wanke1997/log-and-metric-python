@@ -1,7 +1,7 @@
 # HELP python_gc_objects_collected_total Objects collected during gc
 # TYPE python_gc_objects_collected_total counter
-python_gc_objects_collected_total{generation="0"} 348.0
-python_gc_objects_collected_total{generation="1"} 43.0
+python_gc_objects_collected_total{generation="0"} 249.0
+python_gc_objects_collected_total{generation="1"} 29.0
 python_gc_objects_collected_total{generation="2"} 0.0
 # HELP python_gc_objects_uncollectable_total Uncollectable objects found during GC
 # TYPE python_gc_objects_uncollectable_total counter
@@ -10,18 +10,33 @@ python_gc_objects_uncollectable_total{generation="1"} 0.0
 python_gc_objects_uncollectable_total{generation="2"} 0.0
 # HELP python_gc_collections_total Number of times this generation was collected
 # TYPE python_gc_collections_total counter
-python_gc_collections_total{generation="0"} 55.0
-python_gc_collections_total{generation="1"} 5.0
+python_gc_collections_total{generation="0"} 39.0
+python_gc_collections_total{generation="1"} 3.0
 python_gc_collections_total{generation="2"} 0.0
 # HELP python_info Python platform information
 # TYPE python_info gauge
-python_info{implementation="CPython",major="3",minor="9",patchlevel="7",version="3.9.7"} 1.0
-# HELP total_total none
-# TYPE total_total counter
-total_total{succeed="True"} 25.0
-# HELP total_created none
-# TYPE total_created gauge
-total_created{succeed="True"} 1.705285438760237e+09
-# HELP sec none
-# TYPE sec gauge
-sec{succeed="True"} -2.0
+python_info{implementation="CPython",major="3",minor="12",patchlevel="3",version="3.12.3"} 1.0
+# HELP process_virtual_memory_bytes Virtual memory size in bytes.
+# TYPE process_virtual_memory_bytes gauge
+process_virtual_memory_bytes 2.58973696e+08
+# HELP process_resident_memory_bytes Resident memory size in bytes.
+# TYPE process_resident_memory_bytes gauge
+process_resident_memory_bytes 2.3314432e+07
+# HELP process_start_time_seconds Start time of the process since unix epoch in seconds.
+# TYPE process_start_time_seconds gauge
+process_start_time_seconds 1.72358309732e+09
+# HELP process_cpu_seconds_total Total user and system CPU time spent in seconds.
+# TYPE process_cpu_seconds_total counter
+process_cpu_seconds_total 0.13
+# HELP process_open_fds Number of open file descriptors.
+# TYPE process_open_fds gauge
+process_open_fds 9.0
+# HELP process_max_fds Maximum number of open file descriptors.
+# TYPE process_max_fds gauge
+process_max_fds 1.048576e+06
+# HELP five_div Counter for amount of 5-dividend number
+# TYPE five_div gauge
+five_div{success="True"} 40.0
+# HELP three_div Counter for amount of 3-dividend number
+# TYPE three_div gauge
+three_div{success="True"} 66.0
