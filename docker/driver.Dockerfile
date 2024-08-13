@@ -4,9 +4,9 @@ RUN apt-get update
 RUN apt-get install -y curl vim iputils-ping wget ssh net-tools python3
 
 # RUN apt-get install -y python3-pip 
-RUN apt update && apt install python3-pip -y
+RUN apt-get update && apt-get install python3-pip -y
 
-RUN pip3 install prometheus_client ecs_logging
+RUN pip3 install --break-system-packages prometheus_client ecs_logging
 
 EXPOSE 8081
 
